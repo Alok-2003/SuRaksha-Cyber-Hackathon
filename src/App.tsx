@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import NotFound from './components/NotFound';
 import LandingPage from './pages/LandingPage';
 import Footer from './components/Footer';
+import Admin_Dashboard from './pages/Admin_Dashboard';
 // Example components - replace these with your actual components
 const Home = () => <div className="p-6">
   <h1 className="text-3xl font-bold mb-4">Welcome to SuRaksha</h1>
@@ -30,6 +31,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/home" element={<Home />} />
             <Route path="/user-dashboard" element={<UserDashboard />} />
+            <Route path="/admin-dashboard" element={<Admin_Dashboard />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />
