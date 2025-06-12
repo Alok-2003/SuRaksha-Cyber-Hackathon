@@ -5,7 +5,8 @@ import NotFound from './components/NotFound';
 import LandingPage from './pages/LandingPage';
 import Footer from './components/Footer';
 import Admin_Dashboard from './pages/Admin_Dashboard';
-// Example components - replace these with your actual components
+import Dev_Dashboard from './pages/Dev_Dashboard';
+
 const Home = () => <div className="p-6">
   <h1 className="text-3xl font-bold mb-4">Welcome to SuRaksha</h1>
   <p className="text-gray-700">Your cyber security dashboard</p>
@@ -32,6 +33,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/user-dashboard" element={<UserDashboard />} />
             <Route path="/admin-dashboard" element={<Admin_Dashboard />} />
+            <Route path="/dev-dashboard" element={<Dev_Dashboard />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="*" element={<NotFound />} />

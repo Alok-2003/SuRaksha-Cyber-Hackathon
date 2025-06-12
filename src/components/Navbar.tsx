@@ -27,6 +27,7 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center space-x-8">
            <a href="/user-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">User Dashboard</a>
            <a href="/admin-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">Admin Dashboard</a>
+           <a href="/dev-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">Dev Dashboard</a>
             {/* <a href="#features" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Features</a>
             <a href="#pricing" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Pricing</a>
             <a href="#testimonials" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Testimonials</a>
