@@ -25,10 +25,11 @@ const Navbar: React.FC = () => {
           </a>
 
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Features</a>
+           <a href="/user-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">User Dashboard</a>
+            {/* <a href="#features" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Features</a>
             <a href="#pricing" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Pricing</a>
             <a href="#testimonials" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Testimonials</a>
-            <a href="#contact" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Contact</a>
+            <a href="#contact" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Contact</a> */}
             <button className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
               Sign In
             </button>
@@ -50,10 +51,11 @@ const Navbar: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-slate-200">
           <div className="px-4 py-4 space-y-4">
-            <a href="#features" className="block text-slate-600 hover:text-slate-900 font-medium">Features</a>
+           <a href="/user-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium ml-4">User Dashboard</a>
+            {/* <a href="#features" className="block text-slate-600 hover:text-slate-900 font-medium">Features</a>
             <a href="#pricing" className="block text-slate-600 hover:text-slate-900 font-medium">Pricing</a>
             <a href="#testimonials" className="block text-slate-600 hover:text-slate-900 font-medium">Testimonials</a>
-            <a href="#contact" className="block text-slate-600 hover:text-slate-900 font-medium">Contact</a>
+            <a href="#contact" className="block text-slate-600 hover:text-slate-900 font-medium">Contact</a> */}
             <div className="pt-4 border-t border-slate-200 space-y-2">
               <button className="w-full text-left px-4 py-2 text-blue-600 hover:text-blue-700 font-medium">
                 Sign In
