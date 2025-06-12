@@ -1,6 +1,6 @@
 import { Menu, Shield, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import {  useLocation } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const location = useLocation();

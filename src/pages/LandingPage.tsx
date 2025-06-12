@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { Shield, Eye, Users, Lock, CheckCircle, ArrowRight, Menu, X, Star, TrendingUp, Globe, Zap, FileText, AlertTriangle, BarChart3, Clock, Target } from 'lucide-react';
+import React from 'react';
+import { Shield, Eye, Users, Lock, CheckCircle, ArrowRight, Star, TrendingUp, Zap, FileText, AlertTriangle, BarChart3 } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const features = [
     {
       icon: Shield,

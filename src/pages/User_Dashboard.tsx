@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Eye, Clock, Users, Settings, Search, Filter, AlertTriangle, CheckCircle, XCircle, MoreHorizontal } from 'lucide-react';
+import { Shield, Eye, Clock, Users, Settings, Search, Filter, CheckCircle, MoreHorizontal } from 'lucide-react';
 import { AccessHistory } from '../components/user/AccessHistory';
 import { ActiveConsents } from '../components/user/ActiveConsents';
 import { ConsentTemplates } from '../components/user/ConsentTemplates';
