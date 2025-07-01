@@ -4,17 +4,15 @@ const Footer = () => {
   return (
     <footer className="bg-slate-900 text-white py-16">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div className="col-span-1 md:col-span-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="col-span-2 md:col-span-2">
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
               <h3 className="text-xl font-bold">SecureLink</h3>
-              <p className="text-sm text-slate-400">Your Data, Your Rules, Our Protection 
-
-</p>
+              <p className="text-sm text-slate-400">Your Data, Your Rules, Our Protection </p>
             </div>
           </div>
           <p className="text-slate-400 mb-6 max-w-md">

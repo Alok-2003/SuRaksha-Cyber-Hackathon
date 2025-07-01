@@ -25,19 +25,20 @@ const Navbar: React.FC = () => {
           </a>
 
           <div className="hidden md:flex items-center space-x-8">
-           <a href="/user-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">User Dashboard</a>
-           <a href="/admin-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">Admin Dashboard</a>
-           <a href="/dev-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">Dev Dashboard</a>
+           {/* <a href="/user-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">User Dashboard</a> */}
+           {/* <a href="/admin-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">Admin Dashboard</a> */}
+           {/* <a href="/dev-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium">Dev Dashboard</a> */}
             {/* <a href="#features" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Features</a>
             <a href="#pricing" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Pricing</a>
             <a href="#testimonials" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Testimonials</a>
             <a href="#contact" className="text-slate-600 hover:text-slate-900 font-medium transition-colors">Contact</a> */}
-            <button className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
+            {/* <button className="px-4 py-2 text-blue-600 hover:text-blue-700 font-medium transition-colors">
               Sign In
             </button>
             <button className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all">
               Get Started
-            </button>
+            </button> */}
+            <a href="/about" className="block text-white p-2 px-3.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full hover:text-slate-900 font-medium">U</a>
           </div>
 
           <button
@@ -53,7 +54,7 @@ const Navbar: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-slate-200">
           <div className="px-4 py-4 space-y-4">
-           <a href="/user-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium ml-4">User Dashboard</a>
+           {/* <a href="/user-dashboard" className="block text-slate-600 hover:text-slate-900 font-medium ml-4">User Dashboard</a> */}
             {/* <a href="#features" className="block text-slate-600 hover:text-slate-900 font-medium">Features</a>
             <a href="#pricing" className="block text-slate-600 hover:text-slate-900 font-medium">Pricing</a>
             <a href="#testimonials" className="block text-slate-600 hover:text-slate-900 font-medium">Testimonials</a>

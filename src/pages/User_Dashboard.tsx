@@ -4,11 +4,24 @@ import { AccessHistory } from '../components/user/AccessHistory';
 import { ActiveConsents } from '../components/user/ActiveConsents';
 import { ConsentTemplates } from '../components/user/ConsentTemplates';
 import { SharingLimits } from '../components/user/SharingLimits';
+import { PaymentPartnerDialog } from '../components/PaymentPartnerDialog';
+
 
 const UserDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Dialog and dropdown state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedBank, setSelectedBank] = useState('HDFC Bank');
+  const [selectedGateway, setSelectedGateway] = useState('Razorpay');
+  const [selectedCompany, setSelectedCompany] = useState('Acme Corp');
+  const [selectedDate, setSelectedDate] = useState('');
+
+  const bankOptions = ['HDFC Bank', 'ICICI Bank', 'Axis Bank', 'SBI'];
+  const gatewayOptions = ['Razorpay', 'Paytm', 'Stripe', 'PayU'];
+  const companyOptions = ['Acme Corp', 'Globex Ltd', 'Umbrella Inc', 'Wayne Enterprises'];
 
   const stats = [
     {
@@ -151,6 +164,27 @@ const UserDashboard: React.FC = () => {
           <div className="p-6">
             {activeTab === 'overview' && (
               <div className="space-y-6">
+                <button
+                  className="px-4 py-2 text-white bg-blue-500 rounded-lg font-medium transition-colors"
+                  onClick={() => setDialogOpen(true)}
+                >
+                  Payment Partner Verification
+                </button>
+                <PaymentPartnerDialog
+                  open={dialogOpen}
+                  setOpen={setDialogOpen}
+                  selectedBank={selectedBank}
+                  setSelectedBank={setSelectedBank}
+                  selectedGateway={selectedGateway}
+                  setSelectedGateway={setSelectedGateway}
+                  selectedCompany={selectedCompany}
+                  setSelectedCompany={setSelectedCompany}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  bankOptions={bankOptions}
+                  gatewayOptions={gatewayOptions}
+                  companyOptions={companyOptions}
+                />
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h2>
                   <div className="space-y-3">
