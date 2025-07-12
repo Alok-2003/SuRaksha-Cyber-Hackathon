@@ -6,6 +6,8 @@ import LandingPage from './pages/LandingPage';
 import Footer from './components/Footer';
 import Admin_Dashboard from './pages/Admin_Dashboard';
 import Dev_Dashboard from './pages/Dev_Dashboard';
+import SignUp from './pages/auth/SignUp';
+import SignIn from './pages/auth/SignIn';
 
 const Home = () => <div className="p-6">
   <h1 className="text-3xl font-bold mb-4">Welcome to SuRaksha</h1>
@@ -30,6 +32,8 @@ function App() {
         <main className="">
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/home" element={<Home />} />
             <Route path="/user-dashboard" element={<UserDashboard />} />
             <Route path="/admin-dashboard" element={<Admin_Dashboard />} />
