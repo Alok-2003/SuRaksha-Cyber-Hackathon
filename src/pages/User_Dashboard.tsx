@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Eye, Clock, Users, Settings, Search, Filter, CheckCircle, MoreHorizontal } from 'lucide-react';
+import { Shield, Eye, Clock, Users, Settings, Search, Filter, CheckCircle, MoreHorizontal, ShoppingBag } from 'lucide-react';
 import { AccessHistory } from '../components/user/AccessHistory';
 import { ActiveConsents } from '../components/user/ActiveConsents';
 import { ConsentTemplates } from '../components/user/ConsentTemplates';
@@ -63,8 +63,13 @@ const UserDashboard: React.FC = () => {
     { id: 'history', label: 'Access History', icon: Eye },
     { id: 'consents', label: 'Active Consents', icon: CheckCircle },
     { id: 'templates', label: 'Templates', icon: Settings },
-    { id: 'limits', label: 'Sharing Limits', icon: Clock }
+    { id: 'limits', label: 'Sharing Limits', icon: Clock },
+    { id: 'shopping', label: 'Security Store', icon: ShoppingBag }
   ];
+  
+  const navigateToShopping = () => {
+    window.location.href = '/shopping';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -185,9 +190,25 @@ const UserDashboard: React.FC = () => {
                   gatewayOptions={gatewayOptions}
                   companyOptions={companyOptions}
                 />
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h2>
-                  <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="col-span-1">
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow cursor-pointer" onClick={navigateToShopping}>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-900">Security Store</h3>
+                        <ShoppingBag className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <p className="text-slate-600 mb-4">Explore our security products and services to enhance your data protection.</p>
+                      <div className="flex items-center text-blue-600 font-medium">
+                        <span>Visit Store</span>
+                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h2>
+                    <div className="space-y-3">
                     {[
                       { partner: 'FinanceFlow Bank', action: 'Accessed transaction history', time: '2 hours ago', status: 'active' },
                       { partner: 'CreditScope Analytics', action: 'Viewed credit profile', time: '1 day ago', status: 'active' },
@@ -215,6 +236,7 @@ const UserDashboard: React.FC = () => {
                         </div>
                       </div>
                     ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -224,6 +246,19 @@ const UserDashboard: React.FC = () => {
             {activeTab === 'consents' && <ActiveConsents />}
             {activeTab === 'templates' && <ConsentTemplates />}
             {activeTab === 'limits' && <SharingLimits />}
+            {activeTab === 'shopping' && (
+              <div className="text-center py-12">
+                <ShoppingBag className="w-12 h-12 mx-auto text-blue-500 mb-4" />
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">Security Store</h2>
+                <p className="text-slate-600 mb-6">Browse our selection of security products and services to enhance your data protection.</p>
+                <button
+                  onClick={navigateToShopping}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Visit Store
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

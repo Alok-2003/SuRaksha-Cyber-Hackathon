@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Shield, Eye, Users, Lock, CheckCircle, ArrowRight, Star, TrendingUp, Zap, FileText, AlertTriangle, BarChart3 } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
+  useEffect(() => {
+    // Make API call to the securelink prediction API
+    const fetchPrediction = async () => {
+      try {
+        const response = await fetch('https://securelink-prediction-api.onrender.com/');
+        const data = await response.json();
+        console.log('Prediction API response:', data);
+      } catch (error) {
+        console.error('Error fetching prediction data:', error);
+      }
+    };
+
+    fetchPrediction();
+  }, []);
   const features = [
     {
       icon: Shield,

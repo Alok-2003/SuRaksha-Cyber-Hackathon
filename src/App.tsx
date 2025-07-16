@@ -8,6 +8,7 @@ import Admin_Dashboard from './pages/Admin_Dashboard';
 import Dev_Dashboard from './pages/Dev_Dashboard';
 import SignUp from './pages/auth/SignUp';
 import SignIn from './pages/auth/SignIn';
+import ShoppingPage from './pages/ShoppingPage';
 
 const Home = () => <div className="p-6">
   <h1 className="text-3xl font-bold mb-4">Welcome to SuRaksha</h1>
@@ -40,6 +41,7 @@ function App() {
             <Route path="/dev-dashboard" element={<Dev_Dashboard />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/shopping" element={<ShoppingPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

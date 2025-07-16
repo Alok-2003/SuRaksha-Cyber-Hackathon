@@ -5,7 +5,9 @@ import { supabase } from '../../utils/supabaseClient';
 type UserRole = 'user' | 'admin';
 
 const SignUp = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [contact, setContact] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState<UserRole>('user');
@@ -40,6 +42,23 @@ const SignUp = () => {
       });
 
       if (authError) throw authError;
+      
+      // Insert user data into User_Table
+      if (authData?.user) {
+        const { error: userTableError } = await supabase
+          .from('User_Table')
+          .insert({
+            id: authData.user.id,
+            name: name,
+            email: email,
+            contact: parseInt(contact, 10) // Convert string to bigint
+          });
+        
+        if (userTableError) {
+          console.error('Error inserting user data:', userTableError);
+          throw userTableError;
+        }
+      }
 
       // Sign in the user immediately after sign up
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -95,6 +114,22 @@ const SignUp = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
+              <label htmlFor="name" className="sr-only">
+                Full Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Full Name"
+              />
+            </div>
+            <div>
               <label htmlFor="email-address" className="sr-only">
                 Email address
               </label>
@@ -106,8 +141,24 @@ const SignUp = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Email address"
+              />
+            </div>
+            <div>
+              <label htmlFor="contact" className="sr-only">
+                Contact Number
+              </label>
+              <input
+                id="contact"
+                name="contact"
+                type="tel"
+                autoComplete="tel"
+                required
+                value={contact}
+                onChange={(e) => setContact(e.target.value.replace(/\D/g, ''))}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Contact Number"
               />
             </div>
             <div>
