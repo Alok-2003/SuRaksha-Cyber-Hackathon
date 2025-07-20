@@ -14,7 +14,6 @@ interface ConsentData {
   expiryDate: string;
   status: string;
   isAutoRenew: boolean;
-  accessCount: number;
   lastAccessed: string;
   riskLevel: string;
   amount: number;
@@ -32,7 +31,15 @@ interface ConsentData {
       };
       originalDataType: string;
     };
+    read_at?: {
+      count: number;
+      time_date: string | null;
+    };
     [key: string]: any;
+  };
+  read_at?: {
+    count: number;
+    time_date: string | null;
   };
 }
 
@@ -42,8 +49,7 @@ export const ActiveConsents: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [decryptingIds, setDecryptingIds] = useState<Set<string>>(new Set());
   const [decryptedData, setDecryptedData] = useState<Map<string, any>>(new Map());
-
-  useEffect(() => {
+useEffect(() => {
     fetchPaymentTransactions();
   }, []);
 
@@ -60,44 +66,57 @@ export const ActiveConsents: React.FC = () => {
       if (fetchError) {
         throw fetchError;
       }
-console.log("Transactions data",transactions)
       // Transform the data to match the consent structure
       const transformedConsents: ConsentData[] = transactions?.map((transaction: any) => {
-        const daysAgo = Math.floor((new Date().getTime() - new Date(transaction.created_at).getTime()) / (1000 * 60 * 60 * 24));
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 30); // 30 days from now
+        // Calculate days until expiry using real destroy_date
+        const destroyDate = new Date(transaction.destroy_date);
+        const currentDate = new Date();
+        const daysUntilExpiry = Math.ceil((destroyDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
         
-        // Determine status based on transaction age
+        // Determine status based on real expiry date
         let status = 'active';
-        if (daysAgo > 25) {
+        if (daysUntilExpiry <= 0) {
+          status = 'expired';
+        } else if (daysUntilExpiry <= 7) {
           status = 'expiring';
         }
         
-        // Get course title from metadata or use course_id
+        // Get course title from metadata
         const courseTitle = transaction.metadata?.courseTitle || `Course ${transaction.course_id}`;
         
-        // Use transaction data directly
-        const partner = courseTitle;
-        const logo = transaction.course_id;
+        // Create logo from course title initials
+        const logoLetters = courseTitle.split(' ').map((word: string) => word[0]).join('').substring(0, 2).toUpperCase();
+        
+        // Determine data types based on what's actually encrypted
+        const dataTypes = ['Personal Information', 'Payment Data', 'Contact Details'];
+        
+        // Determine risk level based on amount and access count
+        let riskLevel = 'low';
+        if (transaction.amount > 2000 || (transaction.read_at?.count || 0) > 5) {
+          riskLevel = 'medium';
+        }
+        if (transaction.amount > 5000 || (transaction.read_at?.count || 0) > 10) {
+          riskLevel = 'high';
+        }
         
         return {
           id: transaction.id,
-          partner: partner,
-          logo: logo,
-          dataTypes: ['Payment Processing', 'Transaction Records', 'Security Services'],
-          purpose: `Service Access for ${courseTitle}`,
+          partner: courseTitle,
+          logo: logoLetters,
+          dataTypes: dataTypes,
+          purpose: `Payment processing and service access for ${courseTitle}`,
           startDate: transaction.created_at,
-          expiryDate: expiryDate.toISOString(),
+          expiryDate: transaction.destroy_date, // Use real destroy_date
           status: status,
-          isAutoRenew: transaction.course_id === '1', // Premium courses have auto-renew
-          accessCount: Math.floor(Math.random() * 50) + 10,
-          lastAccessed: transaction.created_at,
-          riskLevel: transaction.amount > 1500 ? 'medium' : 'low',
+          isAutoRenew: false, // No auto-renew by default
+          lastAccessed: transaction.read_at?.time_date || transaction.created_at, // Use real last access or creation date
+          riskLevel: riskLevel,
           amount: transaction.amount,
           currency: transaction.currency || 'INR',
           courseTitle: courseTitle,
           encryptionRef: transaction.encryption_ref,
-          metadata: transaction.metadata // Include the full metadata with encryption_data
+          metadata: transaction.metadata, // Include the full metadata with encryption_data
+          read_at: transaction.read_at // Include read_at tracking data
         };
       }) || [];
 
@@ -177,11 +196,40 @@ console.log("Transactions data",transactions)
         }
       };
       
+      // Update read_at tracking in the database
+      try {
+        const currentReadAt = consentInfo?.metadata?.read_at || { count: 0, time_date: null };
+        const updatedReadAt = {
+          count: (currentReadAt.count || 0) + 1,
+          time_date: new Date().toISOString()
+        };
+        
+        const { error: updateError } = await supabase
+          .from('Payment_Transactions')
+          .update({ 
+            read_at: updatedReadAt,
+            // Also update metadata to keep it in sync
+            metadata: {
+              ...consentInfo?.metadata,
+              read_at: updatedReadAt
+            }
+          })
+          .eq('id', consentId);
+          
+        if (updateError) {
+          console.error('Error updating read_at tracking:', updateError);
+        } else {
+          console.log('Successfully updated read_at tracking:', updatedReadAt);
+        }
+      } catch (updateErr) {
+        console.error('Failed to update read_at tracking:', updateErr);
+      }
+      
       // Store the decrypted data
       setDecryptedData(prev => new Map([...prev, [consentId, enhancedResult]]));
       
       // Show success message
-      alert('Data successfully decrypted and retrieved!');
+      // alert('Data successfully decrypted and retrieved!');
       
     } catch (error) {
       console.error('Error decrypting data:', error);
@@ -297,7 +345,7 @@ console.log("Transactions data",transactions)
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-600">Total Accesses</p>
-              <p className="text-2xl font-bold text-blue-700">{consents.reduce((sum, c) => sum + c.accessCount, 0)}</p>
+              <p className="text-2xl font-bold text-blue-700">{consents.reduce((sum, c) => sum + (c.read_at?.count || 0), 0)}</p>
             </div>
             <Users className="w-8 h-8 text-blue-500" />
           </div>
@@ -334,9 +382,14 @@ console.log("Transactions data",transactions)
                   <div className="text-sm text-slate-500 mb-1">
                     {getDaysUntilExpiry(consent.expiryDate)} days left
                   </div>
-                  <div className="text-xs text-slate-400">
-                    {consent.accessCount} accesses
+                  <div className="text-xs text-slate-400 mb-1">
+                    {consent.read_at?.count || 0} data accesses
                   </div>
+                  {consent.read_at?.time_date && (
+                    <div className="text-xs text-slate-400">
+                      Last: {formatDate(consent.read_at.time_date)}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -356,7 +409,7 @@ console.log("Transactions data",transactions)
                     <p className="font-medium text-slate-900">{consent.currency} {consent.amount.toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Transaction ID</p>
                     <p className="font-medium text-slate-900 font-mono text-xs">{consent.id.substring(0, 70)}</p>
@@ -364,6 +417,28 @@ console.log("Transactions data",transactions)
                   <div>
                     <p className="text-sm text-slate-500 mb-1">Encryption Reference</p>
                     <p className="font-medium text-slate-900 font-mono text-xs">{consent.encryptionRef.substring(0, 70)}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Data Access Count</p>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium text-slate-900">{consent.read_at?.count || 0} times</span>
+                      {(consent.read_at?.count || 0) > 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Accessed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 mb-1">Last Access</p>
+                    <p className="font-medium text-slate-900">
+                      {consent.read_at?.time_date ? 
+                        formatDate(consent.read_at.time_date) : 
+                        'Never accessed'
+                      }
+                    </p>
                   </div>
                 </div>
               </div>
@@ -376,7 +451,7 @@ console.log("Transactions data",transactions)
                       <Key className="w-4 h-4 mr-2" />
                       Decrypted Data
                     </h4>
-                    <button 
+                    {/* <button 
                       onClick={() => {
                         const data = decryptedData.get(consent.id);
                         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -393,7 +468,7 @@ console.log("Transactions data",transactions)
                     >
                       <Download className="w-3 h-3" />
                       <span>Download</span>
-                    </button>
+                    </button> */}
                   </div>
                   <div className="space-y-3">
                     {(() => {
@@ -430,7 +505,7 @@ console.log("Transactions data",transactions)
                 </div>
               )}
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Start Date</p>
                   <p className="font-medium text-slate-900">{formatDate(consent.startDate)}</p>
@@ -439,10 +514,7 @@ console.log("Transactions data",transactions)
                   <p className="text-sm text-slate-500 mb-1">Expiry Date</p>
                   <p className="font-medium text-slate-900">{formatDate(consent.expiryDate)}</p>
                 </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Last Accessed</p>
-                  <p className="font-medium text-slate-900">{formatDate(consent.lastAccessed)}</p>
-                </div>
+                
               </div>
 
               {/* Controls */}

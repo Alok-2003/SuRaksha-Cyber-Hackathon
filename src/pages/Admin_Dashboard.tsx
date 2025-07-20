@@ -6,7 +6,7 @@ import { ConsentTemplates } from '../components/admin/ConsentTemplates';
 import { SharingLimits } from '../components/admin/SharingLimits';
 
 const Admin_Dashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('consents');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -46,45 +46,14 @@ const Admin_Dashboard: React.FC = () => {
   ];
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: Shield },
-    { id: 'history', label: 'Access History', icon: Eye },
     { id: 'consents', label: 'Active Consents', icon: CheckCircle },
-    { id: 'templates', label: 'Templates', icon: Settings },
-    { id: 'limits', label: 'Sharing Limits', icon: Clock }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 py-8 mt-14">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-r text-white ${
-                  stat.color === 'text-blue-600' ? 'from-blue-600 to-blue-700' :
-                  stat.color === 'text-green-600' ? 'from-green-600 to-green-700' :
-                  stat.color === 'text-purple-600' ? 'from-purple-600 to-purple-700' :
-                  'from-orange-600 to-orange-700'
-                } flex items-center justify-center`}>
-                 <stat.icon className={`w-6 h-6 text-white`} />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-1">{stat.value}</h3>
-                <p className="text-sm font-medium text-slate-600 mb-2">{stat.title}</p>
-                <p className={`text-xs ${
-                  stat.trend === 'up' ? 'text-green-600' :
-                  stat.trend === 'down' ? 'text-red-600' :
-                  'text-slate-500'
-                }`}>
-                  {stat.change}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-xl border border-slate-200 mb-8">
@@ -109,47 +78,13 @@ const Admin_Dashboard: React.FC = () => {
 
           {/* Tab Content */}
           <div className="p-6">
-            {activeTab === 'overview' && (
+            {activeTab === 'consents' && (
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h2>
-                  <div className="space-y-3">
-                    {[
-                      { partner: 'FinanceFlow Bank', action: 'Accessed transaction history', time: '2 hours ago', status: 'active' },
-                      { partner: 'CreditScope Analytics', action: 'Viewed credit profile', time: '1 day ago', status: 'active' },
-                      { partner: 'InvestTrack Pro', action: 'Downloaded portfolio data', time: '3 days ago', status: 'revoked' }
-                    ].map((activity, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${
-                            activity.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                          }`} />
-                          <div>
-                            <p className="font-medium text-slate-900">{activity.partner}</p>
-                            <p className="text-sm text-slate-600">{activity.action}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-slate-500">{activity.time}</p>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            activity.status === 'active' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {activity.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                
               </div>
             )}
             
-            {activeTab === 'history' && <AccessHistory searchQuery={searchQuery} />}
             {activeTab === 'consents' && <ActiveConsents />}
-            {activeTab === 'templates' && <ConsentTemplates />}
-            {activeTab === 'limits' && <SharingLimits />}
           </div>
         </div>
       </div>

@@ -62,6 +62,8 @@ export const BuyNow: React.FC<BookNowButtonProps> = ({
   const [dataDestructionPeriod, setDataDestructionPeriod] = useState('1Week');
   const [isLoading, setIsLoading] = useState(false);
   const [fetchingUser, setFetchingUser] = useState(true);
+  const [riskLabel, setRiskLabel] = useState<string | null>(null);
+  const [riskLoading, setRiskLoading] = useState(false);
   const navigate = useNavigate();
 // console.log("User details",userDetails)
   // Fetch user details from Supabase when component mounts
@@ -110,7 +112,10 @@ export const BuyNow: React.FC<BookNowButtonProps> = ({
     fetchUserDetails();
   }, [navigate]);
 
-  const openDialog = () => setIsOpen(true);
+  const openDialog = () => {
+    setIsOpen(true);
+    fetchRiskPrediction(); // Fetch risk prediction when dialog opens
+  };
   const closeDialog = () => setIsOpen(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,6 +124,46 @@ export const BuyNow: React.FC<BookNowButtonProps> = ({
       ...prev,
       [name]: value,
     }));
+  };
+
+  // Function to fetch risk prediction when dialog opens
+  const fetchRiskPrediction = async () => {
+    try {
+      setRiskLoading(true);
+      setRiskLabel(null);
+      
+      const response = await fetch('https://securelink-prediction-api.onrender.com/predict_raw/', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          avg_data_retention_days: 12,
+          violations_last_30_days: 0,
+          security_scan_score: 0.99,
+          past_incidents_reported: 2,
+          encryption_policy_score: 0,
+          data_resell_risk: 0.36,
+          response_time_ms: 768,
+          user_complaint_count: 2
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Risk prediction response:', data);
+      setRiskLabel(data.risk_label);
+      
+    } catch (error) {
+      console.error('Error fetching risk prediction:', error);
+      setRiskLabel('Error');
+    } finally {
+      setRiskLoading(false);
+    }
   };
 
   const handlePayment = async () => {
@@ -378,6 +423,38 @@ export const BuyNow: React.FC<BookNowButtonProps> = ({
                 </p>
               </div>
             </div>
+            
+            {/* Risk Assessment Section */}
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Security Risk Assessment:
+                </span>
+                <div className="flex items-center space-x-2">
+                  {riskLoading ? (
+                    <div className="flex items-center space-x-2">
+                      <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Analyzing...</span>
+                    </div>
+                  ) : riskLabel ? (
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      riskLabel.toLowerCase() === 'low' ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' :
+                      riskLabel.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' :
+                      riskLabel.toLowerCase() === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' :
+                      'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
+                    }`}>
+                      {riskLabel} Risk
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Not available</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            
             <div className="mt-6 flex justify-end space-x-4">
               <Button
                 onClick={proceed}

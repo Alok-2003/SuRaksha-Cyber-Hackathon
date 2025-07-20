@@ -13,6 +13,10 @@ interface PaymentTransaction {
   currency: string;
   metadata: any;
   created_at: string;
+  read_at?: {
+    count: number;
+    time_date: string | null;
+  };
 }
 
 interface ConsentData {
@@ -33,6 +37,10 @@ interface ConsentData {
   encryptionRef: string;
   amount?: number;
   currency?: string;
+  read_at?: {
+    count: number;
+    time_date: string | null;
+  };
 }
 
 export const ActiveConsents: React.FC = () => {
@@ -120,7 +128,8 @@ export const ActiveConsents: React.FC = () => {
             email: email,
             encryptionRef: tx.encryption_ref,
             amount: tx.amount,
-            currency: tx.currency
+            currency: tx.currency,
+            read_at: tx.read_at // Include read_at tracking data
           };
         });
         
@@ -266,9 +275,7 @@ export const ActiveConsents: React.FC = () => {
                   <div className="flex items-center mt-3">
                     <Shield className="h-4 w-4 mr-2 text-purple-600" />
                     <span className="text-gray-700 font-medium">Encryption Reference:</span>
-                  </div>
-                  <div className="ml-6 mt-1">
-                    <code className="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs rounded-md font-mono tracking-tight overflow-x-auto max-w-[16rem] inline-block">
+                    <code className="bg-gray-100 ml-1 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs rounded-md font-mono tracking-tight overflow-x-auto max-w-[16rem] inline-block">
                       {consent.encryptionRef}
                     </code>
                   </div>
@@ -276,25 +283,38 @@ export const ActiveConsents: React.FC = () => {
                   <div className="flex items-center mt-3">
                     <Shield className="h-4 w-4 mr-2 text-blue-600" />
                     <span className="text-gray-700 font-medium">Payment Amount:</span>
-                  </div>
-                  <div className="ml-6 mt-1">
-                    <span className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 px-3 py-1.5 text-xs rounded-md font-mono font-semibold shadow-sm">
+                    <span className="bg-green-100 ml-1 text-green-800 dark:bg-green-800 dark:text-green-100 px-3 py-1.5 text-xs rounded-md font-mono font-semibold shadow-sm">
                       {consent.amount} {consent.currency}
                     </span>
+                  </div>
+                  
+                  <div className="flex items-center mt-3">
+                    <Shield className="h-4 w-4 mr-2 text-red-600" />
+                    <span className="text-gray-700 font-medium">Data Access Count:</span>
+                    <div className="ml-2 flex items-center space-x-2">
+                      <span className="bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 px-3 py-1.5 text-xs rounded-md font-mono font-semibold shadow-sm">
+                        {consent.read_at?.count || 0} times
+                      </span>
+                      {(consent.read_at?.count || 0) > 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Accessed
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
                 <div className="text-right">
                   <div className="flex items-center justify-end">
-                    <Clock className="h-4 w-4 mr-2 text-blue-500" />
+                    <Clock className="h-4 w-4 mr-2 text-red-500" />
                     <span className="text-gray-600">
-                      Last accessed: {formatDateTime(consent.lastAccessed)}
+                      Last Admin Access: {consent.read_at?.time_date ? formatDateTime(consent.read_at.time_date) : 'Never'}
                     </span>
                   </div>
                   <div className="flex items-center justify-end mt-2">
-                    <Users className="h-4 w-4 mr-2 text-amber-500" />
+                    <Users className="h-4 w-4 mr-2 text-blue-500" />
                     <span className="text-gray-600">
-                      Access count: <span className="font-medium">{consent.accessCount}</span>
+                      Created: <span className="font-medium">{formatDateTime(consent.lastAccessed)}</span>
                     </span>
                   </div>
                 </div>

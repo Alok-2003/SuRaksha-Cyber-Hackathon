@@ -8,7 +8,7 @@ import { PaymentPartnerDialog } from '../components/PaymentPartnerDialog';
 
 
 const UserDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('consents');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -59,12 +59,9 @@ const UserDashboard: React.FC = () => {
   ];
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: Shield },
-    { id: 'history', label: 'Access History', icon: Eye },
     { id: 'consents', label: 'Active Consents', icon: CheckCircle },
-    { id: 'templates', label: 'Templates', icon: Settings },
-    { id: 'limits', label: 'Sharing Limits', icon: Clock },
-    { id: 'shopping', label: 'Security Store', icon: ShoppingBag }
+    { id: 'templates', label: 'Compliance Templates', icon: Settings },
+    { id: 'shopping', label: 'Dummy E-commerce Store', icon: ShoppingBag }
   ];
   
   const navigateToShopping = () => {
@@ -115,34 +112,7 @@ const UserDashboard: React.FC = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${
-                  stat.color === 'text-blue-600' ? 'from-blue-50 to-blue-100' :
-                  stat.color === 'text-green-600' ? 'from-green-50 to-green-100' :
-                  stat.color === 'text-purple-600' ? 'from-purple-50 to-purple-100' :
-                  'from-orange-50 to-orange-100'
-                } flex items-center justify-center`}>
-                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-1">{stat.value}</h3>
-                <p className="text-sm font-medium text-slate-600 mb-2">{stat.title}</p>
-                <p className={`text-xs ${
-                  stat.trend === 'up' ? 'text-green-600' :
-                  stat.trend === 'down' ? 'text-red-600' :
-                  'text-slate-500'
-                }`}>
-                  {stat.change}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-xl border border-slate-200 mb-8">
@@ -249,8 +219,7 @@ const UserDashboard: React.FC = () => {
             {activeTab === 'shopping' && (
               <div className="text-center py-12">
                 <ShoppingBag className="w-12 h-12 mx-auto text-blue-500 mb-4" />
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">Security Store</h2>
-                <p className="text-slate-600 mb-6">Browse our selection of security products and services to enhance your data protection.</p>
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">Dummy E-commerce Store</h2>
                 <button
                   onClick={navigateToShopping}
                   className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
