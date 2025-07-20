@@ -17,87 +17,85 @@ import { BuyNow } from '../components/BuyNow';
 
 // Product data with more details
 const products = [
-  {
-    id: 1,
-    name: 'Premium Security Suite',
-    price: 2999,
-    originalPrice: 3999,
-    description: 'Advanced protection for all your devices with real-time threat detection and removal.',
-    category: 'Security',
-    rating: 4.8,
-    reviews: 1245,
-    inStock: true,
-    image: 'https://via.placeholder.com/300x200/3b82f6/ffffff?text=Security+Suite',
-    features: ['Real-time protection', 'Multi-device support', 'Phishing protection', 'Parental controls']
-  },
-  {
-    id: 2,
-    name: 'VPN Subscription',
-    price: 999,
-    originalPrice: 1499,
-    description: 'Secure and private internet access with high-speed servers across 50+ countries.',
-    category: 'Privacy',
-    rating: 4.6,
-    reviews: 892,
-    inStock: true,
-    image: 'https://via.placeholder.com/300x200/10b981/ffffff?text=VPN',
-    features: ['Unlimited bandwidth', 'No-logs policy', '50+ locations', 'P2P support']
-  },
-  {
-    id: 3,
-    name: 'Password Manager',
-    price: 499,
-    originalPrice: 799,
-    description: 'Store and manage all your passwords securely with military-grade encryption.',
-    category: 'Security',
-    rating: 4.7,
-    reviews: 1567,
-    inStock: true,
-    image: 'https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Password+Manager',
-    features: ['Unlimited passwords', 'Auto-fill', 'Password generator', 'Secure sharing']
-  },
-  {
-    id: 4,
-    name: 'Data Backup Plan',
-    price: 799,
-    originalPrice: 999,
-    description: 'Automated cloud backup solution for all your important files and documents.',
-    category: 'Storage',
-    rating: 4.5,
-    reviews: 754,
-    inStock: true,
-    image: 'https://via.placeholder.com/300x200/ec4899/ffffff?text=Backup',
-    features: ['1TB Storage', 'Automatic backup', 'File versioning', 'Cross-platform']
-  },
-  {
-    id: 5,
-    name: 'Firewall Protection',
-    price: 1499,
-    originalPrice: 1999,
-    description: 'Advanced network security to protect against unauthorized access.',
-    category: 'Security',
-    rating: 4.6,
-    reviews: 432,
-    inStock: true,
-    image: 'https://via.placeholder.com/300x200/f59e0b/ffffff?text=Firewall',
-    features: ['Network monitoring', 'Intrusion prevention', 'Custom rules', 'Application control']
-  },
-  {
-    id: 6,
-    name: 'Parental Control',
-    price: 699,
-    originalPrice: 899,
-    description: 'Keep your children safe online with comprehensive parental controls.',
-    category: 'Family',
-    rating: 4.4,
-    reviews: 321,
-    inStock: true,
-    image: 'https://via.placeholder.com/300x200/14b8a6/ffffff?text=Parental+Control',
-    features: ['Content filtering', 'Screen time limits', 'Location tracking', 'Activity reports']
-  },
-
-];
-
+    {
+      id: 1,
+      name: 'Echo Sphere (5th Gen)',
+      price: 4499,
+      originalPrice: 5999,
+      description: 'Smart speaker with Alexa. Crisp vocals and balanced bass for full sound that fills your room.',
+      category: 'Electronics',
+      rating: 4.7,
+      reviews: 25890,
+      inStock: true,
+      image: 'https://m.media-amazon.com/images/I/41f80Qu98zL._SY450_.jpg',
+      features: ['Voice control your music', 'Built-in smart home hub', 'Ask Alexa anything', 'Privacy controls']
+    },
+    {
+      id: 2,
+      name: 'Aura Buds Pro',
+      price: 7999,
+      originalPrice: 10999,
+      description: 'True wireless earbuds with Active Noise Cancellation and immersive sound for an enhanced audio experience.',
+      category: 'Electronics',
+      rating: 4.5,
+      reviews: 15234,
+      inStock: true,
+      image: 'https://m.media-amazon.com/images/I/61MEqB9MfML._SX522_.jpg',
+      features: ['Active Noise Cancellation', 'Up to 24 hours battery life', 'Sweat & water resistant', 'Customizable fit']
+    },
+    {
+      id: 3,
+      name: 'AromaBrew Coffee Maker',
+      price: 2499,
+      originalPrice: 3499,
+      description: '12-cup programmable coffee maker with a reusable filter and a keep-warm function.',
+      category: 'Home & Kitchen',
+      rating: 4.6,
+      reviews: 8765,
+      inStock: true,
+      image: 'https://m.media-amazon.com/images/I/31XwXnIUnkL._SX300_SY300_QL70_FMwebp_.jpg',
+      features: ['Programmable timer', 'Auto shut-off', 'Brew strength control', 'Easy to clean']
+    },
+    {
+      id: 4,
+      name: 'FitTrack Horizon 2',
+      price: 3999,
+      originalPrice: 4999,
+      description: 'Advanced fitness and wellness tracker with heart rate, sleep, and activity monitoring.',
+      category: 'Sports & Fitness',
+      rating: 4.4,
+      reviews: 11342,
+      inStock: false,
+      image: 'https://m.media-amazon.com/images/I/81RSrpHOiaL._SY355_.jpg',
+      features: ['24/7 Heart Rate Tracking', 'Sleep Score Analysis', '15+ Exercise Modes', 'Built-in GPS']
+    },
+    {
+      id: 5,
+      name: 'QuickPot 7-in-1 Pressure Cooker',
+      price: 8999,
+      originalPrice: 11999,
+      description: 'Replaces 7 kitchen appliances: pressure cooker, slow cooker, rice cooker, steamer, and more.',
+      category: 'Home & Kitchen',
+      rating: 4.8,
+      reviews: 35421,
+      inStock: true,
+      image: 'https://m.media-amazon.com/images/I/71qc4ccAbBL._SY450_.jpg',
+      features: ['7-in-1 functionality', '13 smart programs', 'Stainless steel pot', 'Advanced safety features']
+    },
+    {
+      id: 6,
+      name: 'The Alchemist',
+      price: 299,
+      originalPrice: 450,
+      description: 'A classic novel by Paulo Coelho about following your dreams. An international bestseller.',
+      category: 'Books',
+      rating: 4.7,
+      reviews: 95102,
+      inStock: true,
+      image: 'https://m.media-amazon.com/images/I/617lxveUjYL._SY342_.jpg',
+      features: ['Paperback Edition', 'Inspirational allegorical story', 'International bestseller', 'Translated into 80+ languages']
+    }
+  ];
 
 interface CartItem {
   id: number;
@@ -197,7 +195,7 @@ const ShoppingPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w- mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button 
@@ -243,98 +241,14 @@ const ShoppingPage: React.FC = () => {
                   )}
                 </button>
                 
-                {/* Cart Dropdown */}
-                {isCartOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
-                    <div className="p-4 border-b border-gray-200">
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-medium">Your Cart ({getCartCount()} items)</h3>
-                        <button 
-                          onClick={() => setIsCartOpen(false)}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="max-h-96 overflow-y-auto">
-                      {cart.length === 0 ? (
-                        <div className="p-6 text-center text-gray-500">
-                          <ShoppingCart className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                          <p>Your cart is empty</p>
-                        </div>
-                      ) : (
-                        <>
-                          {cart.map(item => (
-                            <div key={item.id} className="p-4 border-b border-gray-100 hover:bg-gray-50">
-                              <div className="flex items-center">
-                                <img 
-                                  src={item.image} 
-                                  alt={item.name} 
-                                  className="w-16 h-16 object-cover rounded-md"
-                                />
-                                <div className="ml-3 flex-1">
-                                  <h4 className="text-sm font-medium text-gray-900 line-clamp-1">{item.name}</h4>
-                                  <p className="text-sm font-medium text-gray-900 mt-1">₹{item.price.toLocaleString('en-IN')}</p>
-                                  <div className="flex items-center mt-1">
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeFromCart(item.id);
-                                      }}
-                                      className="text-gray-400 hover:text-red-500 p-1"
-                                    >
-                                      <Minus className="w-3 h-3" />
-                                    </button>
-                                    <span className="mx-2 text-sm text-gray-600">{item.quantity}</span>
-                                    <button 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        addToCart(products.find(p => p.id === item.id)!);
-                                      }}
-                                      className="text-gray-400 hover:text-green-500 p-1"
-                                    >
-                                      <Plus className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setCart(cart.filter(cartItem => cartItem.id !== item.id));
-                                  }}
-                                  className="text-gray-400 hover:text-red-500 p-1"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                          <div className="p-4 border-t border-gray-200">
-                            <div className="flex justify-between mb-4">
-                              <span className="font-medium">Subtotal</span>
-                              <span className="font-medium">₹{getCartTotal().toLocaleString('en-IN')}</span>
-                            </div>
-                            <button
-                              onClick={handleCheckout}
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
-                            >
-                              Proceed to Checkout
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
+
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w- mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobile Search */}
         <div className="md:hidden mb-6">
           <div className="relative">
@@ -484,7 +398,7 @@ const ShoppingPage: React.FC = () => {
                     key={product.id} 
                     className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200 flex flex-col"
                   >
-                    <div className="relative pt-[56.25%] bg-gray-100">
+                    <div className="relative pt-[66.25%] bg-gray-100">
                       <img 
                         src={product.image} 
                         alt={product.name}
@@ -544,29 +458,6 @@ const ShoppingPage: React.FC = () => {
                           id={product.id.toString()}
                           courseTitle={product.name}
                         />
-                        
-                        <button
-                          onClick={() => setExpandedProduct(expandedProduct === product.id ? null : product.id)}
-                          className="w-full mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          {expandedProduct === product.id ? 'Show less' : 'View details'}
-                        </button>
-                        
-                        {expandedProduct === product.id && (
-                          <div className="mt-3 pt-3 border-t border-gray-100">
-                            <h4 className="text-sm font-medium text-gray-900 mb-2">Features:</h4>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                              {product.features.map((feature, index) => (
-                                <li key={index} className="flex items-start">
-                                  <svg className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                  </svg>
-                                  {feature}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

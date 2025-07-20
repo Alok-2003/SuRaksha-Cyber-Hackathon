@@ -1,238 +1,332 @@
-import React, { useState } from 'react';
-import { Shield, Clock, Users, Settings, ToggleLeft, ToggleRight, Calendar, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Clock, Users, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { supabase } from '../../utils/supabaseClient';
+import { format, parseISO, differenceInDays } from 'date-fns';
+
+// Define the transaction structure from Supabase
+interface PaymentTransaction {
+  id: string;
+  user_id: string;
+  course_id: string;
+  encryption_ref: string;
+  amount: number;
+  currency: string;
+  metadata: any;
+  created_at: string;
+}
+
+interface ConsentData {
+  id: string;
+  partner: string;
+  logo: string;
+  dataTypes: string[];
+  purpose: string;
+  startDate: string;
+  expiryDate: string;
+  status: string;
+  isAutoRenew: boolean;
+  accessCount: number;
+  lastAccessed: string;
+  riskLevel: string;
+  contactInfo: string;
+  email: string;
+  encryptionRef: string;
+  amount?: number;
+  currency?: string;
+}
 
 export const ActiveConsents: React.FC = () => {
-  const [consents, setConsents] = useState([
-    {
-      id: 1,
-      partner: 'FinanceFlow Bank',
-      logo: 'FB',
-      dataTypes: ['Transaction History', 'Account Balance', 'Payment Details'],
-      purpose: 'Credit Assessment & Loan Processing',
-      startDate: '2024-01-15',
-      expiryDate: '2024-02-14',
-      status: 'active',
-      isAutoRenew: true,
-      accessCount: 45,
-      lastAccessed: '2024-01-15T14:30:00Z',
-      riskLevel: 'low'
-    },
-    {
-      id: 2,
-      partner: 'CreditScope Analytics',
-      logo: 'CS',
-      dataTypes: ['Credit Score', 'Payment History', 'Debt Information'],
-      purpose: 'Risk Assessment for Insurance',
-      startDate: '2024-01-10',
-      expiryDate: '2024-02-24',
-      status: 'active',
-      isAutoRenew: false,
-      accessCount: 23,
-      lastAccessed: '2024-01-14T09:15:00Z',
-      riskLevel: 'medium'
-    },
-    {
-      id: 3,
-      partner: 'InvestTrack Pro',
-      logo: 'IT',
-      dataTypes: ['Portfolio Data', 'Investment History', 'Risk Profile'],
-      purpose: 'Investment Advisory Services',
-      startDate: '2024-01-05',
-      expiryDate: '2024-01-20',
-      status: 'expiring',
-      isAutoRenew: true,
-      accessCount: 78,
-      lastAccessed: '2024-01-12T16:45:00Z',
-      riskLevel: 'low'
-    }
-  ]);
+  const [consents, setConsents] = useState<ConsentData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const toggleAutoRenew = (id: number) => {
+  useEffect(() => {
+    async function fetchTransactions() {
+      try {
+        setLoading(true);
+        
+        // Get current user
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session?.user) {
+          setError("You must be logged in to view this data");
+          setLoading(false);
+          return;
+        }
+        
+        const userId = sessionData.session.user.id;
+        
+        // Fetch payment transactions for the user
+        const { data: transactionsData, error: transactionsError } = await supabase
+          .from('Payment_Transactions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+          
+        if (transactionsError) {
+          throw transactionsError;
+        }
+        console.log("Transactions data",transactionsData)
+        // Ensure proper typing for the transaction data
+        const typedTransactions: PaymentTransaction[] = transactionsData || [];
+        
+        // Transform payment transactions into consent format for the UI
+        const consentData = typedTransactions.map(tx => {
+          // Extract data from metadata or use defaults
+          const metadata = tx.metadata || {};
+          const courseTitle = metadata.courseTitle || 'Unknown Course';
+          const contactInfo = metadata.contact || 'Not available';
+          const email = metadata.email || 'Not available';
+          
+          // Calculate expiry date (30 days from created_at)
+          const startDate = tx.created_at;
+          const createdDate = new Date(startDate);
+          const expiryDate = new Date(createdDate);
+          expiryDate.setDate(createdDate.getDate() + 30); // 30 day consent
+          
+          // Determine risk level based on data shared
+          let riskLevel = 'low';
+          if (metadata.name && metadata.contact && metadata.email) {
+            riskLevel = 'medium';
+          }
+          
+          // Get first letter of each word in course title for logo
+          const logoLetters = courseTitle
+            .split(' ')
+            .map((word: string) => word.charAt(0))
+            .join('')
+            .substring(0, 2);
+          
+          // Create data types array based on actual metadata present
+          const dataTypes = [];
+          if (metadata.name) dataTypes.push('Identity');
+          if (metadata.contact) dataTypes.push('Contact');
+          if (metadata.email) dataTypes.push('Email');
+          dataTypes.push('Payment Information');
+          
+          return {
+            id: tx.id,
+            partner: courseTitle,
+            logo: logoLetters,
+            dataTypes: dataTypes,
+            purpose: `Payment for ${courseTitle}`,
+            startDate: format(parseISO(startDate), 'yyyy-MM-dd'),
+            expiryDate: format(expiryDate, 'yyyy-MM-dd'),
+            status: 'active',
+            isAutoRenew: false,
+            accessCount: 1, // Initial access
+            lastAccessed: tx.created_at,
+            riskLevel: riskLevel,
+            contactInfo: contactInfo,
+            email: email,
+            encryptionRef: tx.encryption_ref,
+            amount: tx.amount,
+            currency: tx.currency
+          };
+        });
+        
+        setConsents(consentData);
+      } catch (err) {
+        console.error('Error fetching payment transactions:', err);
+        setError('Failed to load your data consent records');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchTransactions();
+  }, []);
+
+  const toggleAutoRenew = (id: string) => {
     setConsents(consents.map(consent => 
       consent.id === id ? { ...consent, isAutoRenew: !consent.isAutoRenew } : consent
     ));
   };
 
-  const revokeConsent = (id: number) => {
+  const revokeConsent = (id: string) => {
     setConsents(consents.map(consent => 
       consent.id === id ? { ...consent, status: 'revoked' } : consent
     ));
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    try {
+      return format(parseISO(dateString), 'MMM dd, yyyy');
+    } catch (error) {
+      return dateString;
+    }
+  };
+  
+  const formatDateTime = (dateString: string) => {
+    try {
+      return format(parseISO(dateString), 'MMM dd, yyyy - HH:mm:ss');
+    } catch (error) {
+      return dateString;
+    }
   };
 
   const getDaysUntilExpiry = (expiryDate: string) => {
-    const expiry = new Date(expiryDate);
-    const today = new Date();
-    const diffTime = expiry.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'expiring':
-        return 'bg-orange-100 text-orange-800';
-      case 'revoked':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+    try {
+      const days = differenceInDays(parseISO(expiryDate), new Date());
+      return days;
+    } catch (error) {
+      return 0;
     }
   };
 
-  const getRiskColor = (risk: string) => {
-    switch (risk) {
-      case 'low':
-        return 'text-green-600 bg-green-50';
-      case 'medium':
-        return 'text-orange-600 bg-orange-50';
-      case 'high':
-        return 'text-red-600 bg-red-50';
-      default:
-        return 'text-gray-600 bg-gray-50';
+  const getStatusColor = (status: string, expiryDate: string) => {
+    if (status === 'revoked') return 'bg-red-100 text-red-800';
+    if (status === 'expired') return 'bg-gray-100 text-gray-800';
+    
+    const days = getDaysUntilExpiry(expiryDate);
+    if (days < 0) return 'bg-gray-100 text-gray-800';
+    if (days < 7) return 'bg-amber-100 text-amber-800';
+    return 'bg-green-100 text-green-800';
+  };
+
+  const getRiskColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-amber-100 text-amber-800';
+      default: return 'bg-green-100 text-green-800';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+        <p className="text-gray-500">Loading your consent records...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-red-500">
+        <AlertTriangle className="w-8 h-8 mb-4" />
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (consents.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+        <CheckCircle2 className="w-8 h-8 mb-4" />
+        <p>You have no active data consent records</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-green-600">Active Consents</p>
-              <p className="text-2xl font-bold text-green-700">{consents.filter(c => c.status === 'active').length}</p>
-            </div>
-            <CheckCircle2 className="w-8 h-8 text-green-500" />
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-orange-600">Expiring Soon</p>
-              <p className="text-2xl font-bold text-orange-700">{consents.filter(c => c.status === 'expiring').length}</p>
-            </div>
-            <Clock className="w-8 h-8 text-orange-500" />
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-blue-600">Total Accesses</p>
-              <p className="text-2xl font-bold text-blue-700">{consents.reduce((sum, c) => sum + c.accessCount, 0)}</p>
-            </div>
-            <Users className="w-8 h-8 text-blue-500" />
-          </div>
+    <div className="w-full overflow-hidden">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">Active Data Consents</h3>
+        <div className="flex items-center space-x-2 bg-blue-100 dark:bg-blue-900 rounded-full px-4 py-2">
+          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">{consents.length} active consent{consents.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
-      {/* Active Consents List */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {consents.map((consent) => (
-          <div key={consent.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
-            {/* Header */}
-            <div className="p-6 border-b border-slate-100">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
-                    <span className="text-sm font-bold text-blue-700">{consent.logo}</span>
+          <div key={consent.id} className="border border-gray-200 dark:border-gray-600 rounded-xl p-5 shadow-md bg-white dark:bg-gray-300 hover:shadow-lg transition-all duration-300">
+            <div className="flex justify-between">
+              <div className="flex items-center">
+                <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                  {consent.logo}
+                </div>
+                <div className="ml-4">
+                  <h4 className="font-medium">{consent.partner}</h4>
+                  <p className="text-sm text-gray-500">{consent.purpose}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end">
+                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(consent.status, consent.expiryDate)}`}>
+                  {consent.status === 'active' ? 'Active' : consent.status}
+                </span>
+                <span className="text-xs text-gray-500 mt-1">
+                  Expires: {formatDate(consent.expiryDate)}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 border-t pt-4">
+              <div className="flex justify-between text-base">
+                <div>
+                  {/* <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-green-600" />
+                    <span className="text-gray-700 font-medium">Data Categories:</span>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-semibold text-slate-900">{consent.partner}</h3>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(consent.status)}`}>
-                        {consent.status}
-                      </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${getRiskColor(consent.riskLevel)}`}>
-                        {consent.riskLevel} risk
-                      </span>
-                    </div>
-                    <p className="text-slate-600 mb-3">{consent.purpose}</p>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {consent.dataTypes.map((dataType, index) => (
-                        <span key={index} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
-                          {dataType}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="ml-6 mt-1 flex flex-wrap gap-1.5">
+                    {consent.dataTypes.map((type, index) => (
+                      <span key={index} className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-800 dark:to-indigo-900 border border-blue-100 dark:border-blue-700 px-2.5 py-1 text-xs rounded-md shadow-sm font-medium text-blue-700 dark:text-blue-200">{type}</span>
+                    ))}
+                  </div> */}
+                  
+                  <div className="flex items-center mt-3">
+                    <Shield className="h-4 w-4 mr-2 text-purple-600" />
+                    <span className="text-gray-700 font-medium">Encryption Reference:</span>
+                  </div>
+                  <div className="ml-6 mt-1">
+                    <code className="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs rounded-md font-mono tracking-tight overflow-x-auto max-w-[16rem] inline-block">
+                      {consent.encryptionRef}
+                    </code>
+                  </div>
+                  
+                  <div className="flex items-center mt-3">
+                    <Shield className="h-4 w-4 mr-2 text-blue-600" />
+                    <span className="text-gray-700 font-medium">Payment Amount:</span>
+                  </div>
+                  <div className="ml-6 mt-1">
+                    <span className="bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 px-3 py-1.5 text-xs rounded-md font-mono font-semibold shadow-sm">
+                      {consent.amount} {consent.currency}
+                    </span>
                   </div>
                 </div>
                 
                 <div className="text-right">
-                  <div className="text-sm text-slate-500 mb-1">
-                    {getDaysUntilExpiry(consent.expiryDate)} days left
+                  <div className="flex items-center justify-end">
+                    <Clock className="h-4 w-4 mr-2 text-blue-500" />
+                    <span className="text-gray-600">
+                      Last accessed: {formatDateTime(consent.lastAccessed)}
+                    </span>
                   </div>
-                  <div className="text-xs text-slate-400">
-                    {consent.accessCount} accesses
+                  <div className="flex items-center justify-end mt-2">
+                    <Users className="h-4 w-4 mr-2 text-amber-500" />
+                    <span className="text-gray-600">
+                      Access count: <span className="font-medium">{consent.accessCount}</span>
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Details */}
-            <div className="p-6 bg-slate-50">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Start Date</p>
-                  <p className="font-medium text-slate-900">{formatDate(consent.startDate)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Expiry Date</p>
-                  <p className="font-medium text-slate-900">{formatDate(consent.expiryDate)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Last Accessed</p>
-                  <p className="font-medium text-slate-900">{formatDate(consent.lastAccessed)}</p>
-                </div>
+            <div className="mt-4 border-t pt-4 flex justify-between items-center">
+              <div className="flex items-center">
+                <span className="text-sm mr-2">Auto-renew:</span>
+                <button
+                  onClick={() => toggleAutoRenew(consent.id)}
+                  className="focus:outline-none"
+                  aria-label="Toggle auto-renew"
+                >
+                  {consent.isAutoRenew ? (
+                    <ToggleRight className="h-5 w-5 text-primary" />
+                  ) : (
+                    <ToggleLeft className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
               </div>
-
-              {/* Controls */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-slate-700">Auto-renewal</span>
-                    <button
-                      onClick={() => toggleAutoRenew(consent.id)}
-                      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                      {consent.isAutoRenew ? (
-                        <ToggleRight className="w-11 h-6 text-blue-600" />
-                      ) : (
-                        <ToggleLeft className="w-11 h-6 text-slate-300" />
-                      )}
-                    </button>
-                  </div>
-                  
-                  <button className="flex items-center space-x-2 text-sm text-slate-600 hover:text-slate-800">
-                    <Settings className="w-4 h-4" />
-                    <span>Modify Consent</span>
-                  </button>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <button className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
-                    <Calendar className="w-4 h-4 inline mr-1" />
-                    Extend
-                  </button>
-                  <button 
-                    onClick={() => revokeConsent(consent.id)}
-                    disabled={consent.status === 'revoked'}
-                    className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {consent.status === 'revoked' ? 'Revoked' : 'Revoke'}
-                  </button>
-                </div>
+              
+              <div className="flex items-center">
+                <span className={`text-xs px-2 py-1 rounded-full mr-4 ${getRiskColor(consent.riskLevel)}`}>
+                  {consent.riskLevel.charAt(0).toUpperCase() + consent.riskLevel.slice(1)} risk
+                </span>
+                <button
+                  onClick={() => revokeConsent(consent.id)}
+                  className="text-sm text-red-600 hover:text-red-800"
+                >
+                  Revoke
+                </button>
               </div>
             </div>
           </div>
