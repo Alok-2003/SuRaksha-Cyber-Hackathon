@@ -9,6 +9,8 @@ import Dev_Dashboard from './pages/Dev_Dashboard';
 import SignUp from './pages/auth/SignUp';
 import SignIn from './pages/auth/SignIn';
 import ShoppingPage from './pages/ShoppingPage';
+import { useKeepAlive } from './hooks/useKeepAlive';
+import { KeepAliveIndicator } from './components/KeepAliveIndicator';
 
 const Home = () => <div className="p-6">
   <h1 className="text-3xl font-bold mb-4">Welcome to SuRaksha</h1>
@@ -26,6 +28,9 @@ const Contact = () => <div className="p-6">
 </div>;
 
 function App() {
+  // Initialize keep-alive service to prevent Render API from sleeping
+  useKeepAlive();
+  
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
@@ -46,6 +51,8 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        {/* Keep-alive indicator for Render API status */}
+        <KeepAliveIndicator />
       </div>
     </Router>
   );
