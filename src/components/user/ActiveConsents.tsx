@@ -151,10 +151,30 @@ export const ActiveConsents: React.FC = () => {
     ));
   };
 
-  const revokeConsent = (id: string) => {
-    setConsents(consents.map(consent => 
-      consent.id === id ? { ...consent, status: 'revoked' } : consent
-    ));
+  const revokeConsent = async (id: string) => {
+    try {
+      // Update the is_consent column to false in the database
+      const { error } = await supabase
+        .from('Payment_Transactions')
+        .update({ is_consent: false })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error revoking consent:', error);
+        alert('Failed to revoke consent. Please try again.');
+        return;
+      }
+
+      // Update local state to reflect the change
+      setConsents(consents.map(consent => 
+        consent.id === id ? { ...consent, status: 'revoked' } : consent
+      ));
+
+      alert('Consent successfully revoked!');
+    } catch (error) {
+      console.error('Error revoking consent:', error);
+      alert('Failed to revoke consent. Please try again.');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -238,7 +258,7 @@ export const ActiveConsents: React.FC = () => {
 
       <div className="space-y-6">
         {consents.map((consent) => (
-          <div key={consent.id} className="border border-gray-200 dark:border-gray-600 rounded-xl p-5 shadow-md bg-white dark:bg-gray-300 hover:shadow-lg transition-all duration-300">
+          <div key={consent.id} className="border border-gray-200 dark:border-gray-600 rounded-xl p-5 shadow-md bg-white dark:bg-gray-100 hover:shadow-lg transition-all duration-300">
             <div className="flex justify-between">
               <div className="flex items-center">
                 <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
@@ -259,23 +279,13 @@ export const ActiveConsents: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-2 border-t pt-2">
               <div className="flex justify-between text-base">
                 <div>
-                  {/* <div className="flex items-center">
-                    <Shield className="h-4 w-4 mr-2 text-green-600" />
-                    <span className="text-gray-700 font-medium">Data Categories:</span>
-                  </div>
-                  <div className="ml-6 mt-1 flex flex-wrap gap-1.5">
-                    {consent.dataTypes.map((type, index) => (
-                      <span key={index} className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-800 dark:to-indigo-900 border border-blue-100 dark:border-blue-700 px-2.5 py-1 text-xs rounded-md shadow-sm font-medium text-blue-700 dark:text-blue-200">{type}</span>
-                    ))}
-                  </div> */}
-                  
                   <div className="flex items-center mt-3">
                     <Shield className="h-4 w-4 mr-2 text-purple-600" />
                     <span className="text-gray-700 font-medium">Encryption Reference:</span>
-                    <code className="bg-gray-100 ml-1 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs rounded-md font-mono tracking-tight overflow-x-auto max-w-[16rem] inline-block">
+                    <code className="bg-gray-100 ml-1 text-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs rounded-md font-mono tracking-tight overflow-x-auto max-w-[16rem] inline-block">
                       {consent.encryptionRef}
                     </code>
                   </div>

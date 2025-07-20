@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Clock, Users, Settings, ToggleLeft, ToggleRight, Calendar, AlertTriangle, CheckCircle2, Key, Download } from 'lucide-react';
+import { Shield, Clock, Users, Settings, ToggleLeft, ToggleRight, Calendar, AlertTriangle, CheckCircle2, Key, Download, Search, X, Building2 } from 'lucide-react';
 import { supabase } from '../../utils/supabaseClient';
 
 
@@ -20,6 +20,7 @@ interface ConsentData {
   currency: string;
   courseTitle: string;
   encryptionRef: string;
+  is_consent: boolean;
   metadata?: {
     encryption_data?: {
       platform: string;
@@ -43,12 +44,27 @@ interface ConsentData {
   };
 }
 
+// Company data for the overview dialog
+const COMPANY_OPTIONS = [
+  { id: 'P001', name: 'FinScope Technologies' },
+  { id: 'P002', name: 'CredX Capital' },
+  { id: 'P003', name: 'PaySure Systems' },
+  { id: 'P004', name: 'VeriBank AI' }
+];
+
 export const ActiveConsents: React.FC = () => {
   const [consents, setConsents] = useState<ConsentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [decryptingIds, setDecryptingIds] = useState<Set<string>>(new Set());
   const [decryptedData, setDecryptedData] = useState<Map<string, any>>(new Map());
+  
+  // Dialog state
+  const [showOverviewDialog, setShowOverviewDialog] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [riskData, setRiskData] = useState<any>(null);
+  const [loadingRisk, setLoadingRisk] = useState(false);
 useEffect(() => {
     fetchPaymentTransactions();
   }, []);
@@ -115,6 +131,7 @@ useEffect(() => {
           currency: transaction.currency || 'INR',
           courseTitle: courseTitle,
           encryptionRef: transaction.encryption_ref,
+          is_consent: transaction.is_consent !== false, // Include consent status, default to true if undefined
           metadata: transaction.metadata, // Include the full metadata with encryption_data
           read_at: transaction.read_at // Include read_at tracking data
         };
@@ -139,6 +156,53 @@ useEffect(() => {
     setConsents(consents.map(consent => 
       consent.id === id ? { ...consent, status: 'revoked' } : consent
     ));
+  };
+
+  // Function to fetch risk analysis data
+  const fetchRiskAnalysis = async (partnerId: string) => {
+    try {
+      setLoadingRisk(true);
+      const response = await fetch(`https://securelink-prediction-api.onrender.com/explain_risk/?partner_id=${partnerId}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch risk analysis: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setRiskData(data);
+    } catch (error) {
+      console.error('Error fetching risk analysis:', error);
+      alert('Failed to fetch risk analysis. Please try again.');
+    } finally {
+      setLoadingRisk(false);
+    }
+  };
+
+  // Function to handle company selection and fetch risk data
+  const handleCompanySelect = (companyId: string) => {
+    setSelectedCompany(companyId);
+    fetchRiskAnalysis(companyId);
+  };
+
+  // Function to open the overview dialog
+  const openOverviewDialog = () => {
+    setShowOverviewDialog(true);
+    setSelectedCompany('');
+    setSearchQuery('');
+    setRiskData(null);
+  };
+
+  // Function to close the overview dialog
+  const closeOverviewDialog = () => {
+    setShowOverviewDialog(false);
+    setSelectedCompany('');
+    setSearchQuery('');
+    setRiskData(null);
   };
 
   const requestDecryptedData = async (consentId: string, encryptionRef: string) => {
@@ -320,7 +384,7 @@ useEffect(() => {
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
         <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -349,6 +413,15 @@ useEffect(() => {
             </div>
             <Users className="w-8 h-8 text-blue-500" />
           </div>
+        </div>
+        <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+          <button 
+            onClick={openOverviewDialog}
+            className="px-6 py-2 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-600 font-bold text-lg rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          >
+            <Building2 className="w-4 h-4" />
+            <span>Get Overview of company</span>
+          </button>
         </div>
       </div>
 
@@ -519,37 +592,23 @@ useEffect(() => {
 
               {/* Controls */}
               <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-slate-700">Auto-renewal</span>
-                    <button
-                      onClick={() => toggleAutoRenew(consent.id)}
-                      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                      {consent.isAutoRenew ? (
-                        <ToggleRight className="w-11 h-6 text-blue-600" />
-                      ) : (
-                        <ToggleLeft className="w-11 h-6 text-slate-300" />
-                      )}
-                    </button>
-                  </div>
-                  
-                  <button className="flex items-center space-x-2 text-sm text-slate-600 hover:text-slate-800">
-                    <Settings className="w-4 h-4" />
-                    <span>Modify Consent</span>
-                  </button>
-                </div>
+                
                 
                 <div className="flex items-center space-x-3">
                   <button 
                     onClick={() => requestDecryptedData(consent.id, consent.encryptionRef)}
-                    disabled={decryptingIds.has(consent.id) || consent.status === 'revoked'}
+                    disabled={decryptingIds.has(consent.id) || consent.status === 'revoked' || !consent.is_consent}
                     className="px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                   >
                     {decryptingIds.has(consent.id) ? (
                       <>
                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-purple-600"></div>
                         <span>Decrypting...</span>
+                      </>
+                    ) : !consent.is_consent ? (
+                      <>
+                        <Key className="w-4 h-4" />
+                        <span>Consent Revoked</span>
                       </>
                     ) : (
                       <>
@@ -581,6 +640,196 @@ useEffect(() => {
           <Shield className="w-12 h-12 text-slate-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">No active consents</h3>
           <p className="text-slate-500">You haven't granted access to any partners yet.</p>
+        </div>
+      )}
+
+      {/* Company Overview Dialog */}
+      {showOverviewDialog && (
+        <div className="fixed -top-6 inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Dialog Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <Building2 className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900">Company Risk Overview</h2>
+              </div>
+              <button
+                onClick={closeOverviewDialog}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Dialog Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {/* Search Section */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter Company ID or Search Companies
+                </label>
+                <div className="flex space-x-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Enter company ID (e.g., P001) or search..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && searchQuery.trim()) {
+                          handleCompanySelect(searchQuery.trim().toUpperCase());
+                        }
+                      }}
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (searchQuery.trim()) {
+                        handleCompanySelect(searchQuery.trim().toUpperCase());
+                      }
+                    }}
+                    disabled={!searchQuery.trim() || loadingRisk}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                  >
+                    {loadingRisk ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    ) : (
+                      <Search className="w-4 h-4" />
+                    )}
+                    <span>Analyze</span>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter a company ID (P001, P002, P003, P004) or search from the options below
+                </p>
+              </div>
+
+              {/* Company Options */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                {COMPANY_OPTIONS
+                  .filter(company => 
+                    company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    company.id.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((company) => (
+                    <button
+                      key={company.id}
+                      onClick={() => handleCompanySelect(company.id)}
+                      disabled={loadingRisk}
+                      className={`p-4 border rounded-lg text-left transition-all ${
+                        selectedCompany === company.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">{company.name}</div>
+                          <div className="text-sm text-gray-500">{company.id}</div>
+                        </div>
+                        {selectedCompany === company.id && loadingRisk && (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        )}
+                      </div>
+                    </button>
+                  ))
+                }
+              </div>
+
+              {/* Risk Analysis Results */}
+              {riskData && (
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Risk Analysis Results</h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      riskData.risk_level === 'Low' ? 'bg-green-100 text-green-800' :
+                      riskData.risk_level === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {riskData.risk_level} Risk
+                    </span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="text-sm text-gray-600 mb-2">
+                      Partner ID: <span className="font-medium">{riskData.partner_id}</span>
+                    </div>
+                  </div>
+
+                  <div className="prose max-w-none">
+                    <div className="text-sm text-gray-700 leading-relaxed space-y-4">
+                      {riskData.explanation.split('\n').map((line: string, index: number) => {
+                        // Handle empty lines
+                        if (!line.trim()) {
+                          return <div key={index} className="h-2"></div>;
+                        }
+                        
+                        // Handle main headings (surrounded by **)
+                        if (line.includes('**') && !line.startsWith('1.') && !line.startsWith('2.') && !line.startsWith('3.')) {
+                          const boldText = line.replace(/\*\*(.*?)\*\*/g, '$1');
+                          return (
+                            <h4 key={index} className="text-lg font-bold text-gray-900 mt-6 mb-3">
+                              {boldText}
+                            </h4>
+                          );
+                        }
+                        
+                        // Handle section headers (like "Risk Factors:", "Red Flags:", etc.)
+                        if (line.endsWith(':') && !line.startsWith(' ') && !line.match(/^\d+\./)) {
+                          return (
+                            <h5 key={index} className="text-base font-semibold text-gray-800 mt-4 mb-2 border-b border-gray-300 pb-1">
+                              {line}
+                            </h5>
+                          );
+                        }
+                        
+                        // Handle numbered lists
+                        if (line.match(/^\d+\./)) {
+                          const content = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                          return (
+                            <div key={index} className="ml-4 mb-2">
+                              <div 
+                                className="text-gray-700"
+                                dangerouslySetInnerHTML={{ __html: content }}
+                              />
+                            </div>
+                          );
+                        }
+                        
+                        // Handle regular paragraphs with bold formatting
+                        const content = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        return (
+                          <p 
+                            key={index} 
+                            className="text-gray-700 mb-2"
+                            dangerouslySetInnerHTML={{ __html: content }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {loadingRisk && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <span className="ml-3 text-gray-600">Analyzing risk data...</span>
+                </div>
+              )}
+
+              {/* No Selection State */}
+              {!selectedCompany && !loadingRisk && (
+                <div className="text-center py-12 text-gray-500">
+                  <Building2 className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p>Select a company to view risk analysis</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
